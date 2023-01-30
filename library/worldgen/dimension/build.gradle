@@ -11,11 +11,16 @@ qslModule {
 	moduleDependencies {
 		core {
 			api("qsl_base")
+			api("resource_loader")
 			testmodOnly("lifecycle_events")
-			testmodOnly("resource_loader")
 		}
 		management {
 			testmodOnly("command")
+		}
+	}
+	entrypoints {
+		client_init {
+			values = ["org.quiltmc.qsl.worldgen.dimension.impl.client.ClientQuiltDimensionsMod"]
 		}
 	}
 }

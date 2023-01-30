@@ -1,6 +1,6 @@
 /*
  * Copyright 2016, 2017, 2018, 2019 FabricMC
- * Copyright 2022 QuiltMC
+ * Copyright 2022-2023 QuiltMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.storage.WorldSaveStorage;
 
+import org.quiltmc.qsl.worldgen.dimension.impl.QuiltDimensionsImpl;
+
 /**
  * After removing a dimension mod or a dimension data pack, Minecraft may fail to enter
  * the world, because it fails to deserialize the chunk generator of the custom dimensions in file {@code level.dat}
@@ -51,16 +53,12 @@ import net.minecraft.world.storage.WorldSaveStorage;
 @Mixin(WorldSaveStorage.class)
 public class WorldSaveStorageBugfixMixin {
 	@SuppressWarnings("unchecked")
-	@Inject(method = "readGeneratorProperties", at = @At("HEAD"))
+	@Inject(method = "readGeneratorProperties", at = @At("RETURN"))
 	private static <T> void onReadGeneratorProperties(
 			Dynamic<T> nbt, DataFixer dataFixer, int version,
 			CallbackInfoReturnable<Pair<GeneratorOptions, Lifecycle>> cir
 	) {
-		NbtElement nbtTag = ((Dynamic<NbtElement>) nbt).getValue();
-
-		NbtCompound worldGenSettings = ((NbtCompound) nbtTag).getCompound("WorldGenSettings");
-
-		quilt$removeNonVanillaDimensionsFromNbt(worldGenSettings);
+		QuiltDimensionsImpl.canContinueWorldLoad();
 	}
 
 	@Unique

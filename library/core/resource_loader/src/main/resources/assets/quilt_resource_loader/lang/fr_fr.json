@@ -1,0 +1,4 @@
+{
+  "quilt.error.id.malformed": "L'identifiant \"%s\" est malformé.",
+  "quilt.error.registry.get_element_failure": "L'élément \"%s\" n'a pas pu être trouvé dans le registre."
+}

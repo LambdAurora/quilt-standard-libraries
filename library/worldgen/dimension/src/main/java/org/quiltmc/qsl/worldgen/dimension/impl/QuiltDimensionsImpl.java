@@ -1,6 +1,6 @@
 /*
  * Copyright 2016, 2017, 2018, 2019 FabricMC
- * Copyright 2022 QuiltMC
+ * Copyright 2022-2023 QuiltMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,39 @@ package org.quiltmc.qsl.worldgen.dimension.impl;
 
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.ApiStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.TeleportTarget;
+import net.minecraft.world.dimension.DimensionOptions;
+
+import org.quiltmc.qsl.base.api.util.TriState;
 
 @ApiStatus.Internal
 public class QuiltDimensionsImpl {
+	private static final Logger LOGGER = LoggerFactory.getLogger("QuiltDimensions");
+	private static final String IGNORE_FAIL_KEY = "quilt.dimension.ignore_failed_deserialization";
+	public static final boolean IGNORE_FAIL = TriState.fromProperty(IGNORE_FAIL_KEY).toBooleanOrElse(false);
+	private static DimensionDeserializationFailHandler failHandler = errors -> {
+		if (!IGNORE_FAIL) {
+			LOGGER.error("""
+							Failed to deserialize dimensions from NBT due to missing elements.
+							No confirmation interface could be displayed, so the loading of the world will be cancelled.
+							If you wish to ignore this deserialization issue and force-load the world, please specify "-D{}=true" in JVM arguments.""",
+					IGNORE_FAIL_KEY);
+		}
+
+		return IGNORE_FAIL;
+	};
+	private static FailSoftMapCodec<RegistryKey<DimensionOptions>, DimensionOptions> dimensionFailSoftMapCodec;
+
 	// Static only-class, no instantiation necessary!
 	private QuiltDimensionsImpl() {
+		throw new UnsupportedOperationException("QuiltDimensionsImpl only contains static definitions.");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -60,5 +83,25 @@ public class QuiltDimensionsImpl {
 			// Always clean up!
 			access.setTeleportTarget(null);
 		}
+	}
+
+	public static void setDimensionFailSoftMapCodec(FailSoftMapCodec<RegistryKey<DimensionOptions>, DimensionOptions> codec) {
+		dimensionFailSoftMapCodec = codec;
+	}
+
+	public static void setDimensionFailHandler(DimensionDeserializationFailHandler failHandler) {
+		QuiltDimensionsImpl.failHandler = failHandler;
+	}
+
+	public static boolean canContinueWorldLoad() {
+		boolean result = true;
+
+		if (!dimensionFailSoftMapCodec.getErrors().isEmpty()) {
+			result = failHandler.shouldContinueLoad(dimensionFailSoftMapCodec.getErrors());
+		}
+
+		dimensionFailSoftMapCodec.getErrors().clear();
+
+		return result;
 	}
 }
