@@ -65,7 +65,6 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :runAutoAllTestServer --stacktrace
-          cache-read-only: ${{ startsWith(github.ref, 'refs/head/1.') }}
 
   run_game_test_server:
     strategy:
@@ -87,4 +86,3 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :runGameAllTestServer --stacktrace
-          cache-read-only: ${{ startsWith(github.ref, 'refs/head/1.') }}
