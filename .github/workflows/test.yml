@@ -40,7 +40,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: QSL project ${{ matrix.java }}
-          path: ./project.zip
+          path: ./qsl.zip
           retention-days: 1
   run_test_server:
     strategy:
@@ -60,6 +60,7 @@ jobs:
         with:
           name: QSL project ${{ matrix.java }}
       - run: unzip "QSL project ${{ matrix.java }}.zip"
+      - run: rm "QSL project ${{ matrix.java }}.zip" && unzip qsl.zip
       - run: mkdir run && echo "eula=true" >> run/eula.txt
       - name: Run auto-test server
         uses: gradle/gradle-build-action@v2
