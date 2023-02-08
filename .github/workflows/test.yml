@@ -19,10 +19,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: checkLicenses generateQmj --parallel --stacktrace
+          cache-read-only: ${{ startsWith(github.ref, 'refs/head/1.') }}
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
           arguments: assemble publishToMavenLocal --stacktrace --parallel -Porg.gradle.parallel.threads=4
+          cache-read-only: ${{ startsWith(github.ref, 'refs/head/1.') }}
       - uses: actions/upload-artifact@v3
         with:
           name: Production Mods
@@ -63,6 +65,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :runAutoAllTestServer --stacktrace
+          cache-read-only: ${{ startsWith(github.ref, 'refs/head/1.') }}
 
   run_game_test_server:
     strategy:
@@ -84,3 +87,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :runGameAllTestServer --stacktrace
+          cache-read-only: ${{ startsWith(github.ref, 'refs/head/1.') }}
