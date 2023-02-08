@@ -36,7 +36,7 @@ jobs:
         with:
           name: Test Mods
           path: ./**/build/libs/*-testmod.jar
-      - run: zip -r qsl.zip ./*
+      - run: zip -r qsl.zip ./* .gradle
       - uses: actions/upload-artifact@v3
         with:
           name: QSL project ${{ matrix.java }}
