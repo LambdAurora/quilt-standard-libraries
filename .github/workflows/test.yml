@@ -38,7 +38,7 @@ jobs:
         with:
           name: Test Mods
           path: ./**/build/libs/*-testmod.jar
-      - run: zip -r qsl.zip ./* .gradle/7.6 .gradle/quilt-loom-cache/remapped_mods
+      - run: zip -r qsl.zip ./**/build .gradle
       - uses: actions/upload-artifact@v3
         with:
           name: QSL project ${{ matrix.java }}
@@ -52,6 +52,9 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           distribution: "temurin"
@@ -73,6 +76,9 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           distribution: "temurin"
