@@ -23,7 +23,7 @@ jobs:
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: assemble publishToMavenLocal --stacktrace --parallel -Porg.gradle.parallel.threads=4
+          arguments: assemble testmodRemapJar publishToMavenLocal --stacktrace --parallel -Porg.gradle.parallel.threads=4
           cache-read-only: ${{ startsWith(github.ref, 'refs/head/1.') }}
       - uses: actions/upload-artifact@v3
         with:
@@ -38,7 +38,7 @@ jobs:
         with:
           name: Test Mods
           path: ./**/build/libs/*-testmod.jar
-      - run: zip -r qsl.zip ./* .gradle
+      - run: zip -r qsl.zip ./* .gradle/7.6 .gradle/quilt-loom-cache/remapped_mods
       - uses: actions/upload-artifact@v3
         with:
           name: QSL project ${{ matrix.java }}
