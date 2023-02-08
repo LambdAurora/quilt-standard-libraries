@@ -23,8 +23,6 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build publishToMavenLocal --stacktrace --parallel -Porg.gradle.parallel.threads=4
-      - run: mkdir run && echo "eula=true" >> run/eula.txt
-      - run: ./gradlew :runAutoAllTestServer --stacktrace
       - uses: actions/upload-artifact@v3
         with:
           name: Production Mods
@@ -38,3 +36,32 @@ jobs:
         with:
           name: Test Mods
           path: ./**/build/libs/*-testmod.jar
+      - run: zip -r qsl.zip ./*
+      - uses: actions/upload-artifact@v3
+        with:
+          name: QSL project ${{ matrix.java }}
+          path: ./project.zip
+          retention-days: 1
+  run_test_server:
+    strategy:
+      matrix:
+        java: [17, 19]
+    runs-on: ubuntu-22.04
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: ${{ matrix.java }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: QSL project ${{ matrix.java }}
+      - run: unzip "QSL project ${{ matrix.java }}.zip"
+      - run: mkdir run && echo "eula=true" >> run/eula.txt
+      - name: Run auto-test server
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :runAutoAllTestServer --stacktrace
